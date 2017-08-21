@@ -44,28 +44,67 @@ Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(5, 8, PIN,
 void setup() {
   matrix.begin();
   matrix.setTextWrap(false);
-  matrix.setBrightness(10);
+  matrix.setBrightness(5);
 }
 
-uint32_t colorStep(int input_value) {
-  float step = 0;
-  float input_value_2 = (float)input_value;
-  step = (float)input_value_2 / 1000;
-  int r = (sin(step) * 128) + 128;
-  int g = (sin(step * PI + 2) * 128) + 128;
-  int b = (sin(step * PI + 4) * 128) + 128;
-  return Adafruit_NeoPixel::Color(r,  g, b, 0);
-}
-
-int pass = 0;
+float pass = 0;
 
 void loop() {
-  pass++;
-  if (pass >= 10000) {
-    pass = 0;
+  pass+=0.1;
+  if (pass >= 361) {
+    pass = 0.0;
   }
-  matrix.setPassThruColor(colorStep(pass));
+
+  float r, g, b;
+
+  float ONE = 1.0;
+
+  HSVtoRGB(r, g, b, pass, ONE, ONE);
+
+  matrix.setPassThruColor(Adafruit_NeoPixel::Color(r * 255, g * 255, b * 255,0));
+  //  matrix.setPassThruColor(Adafruit_NeoPixel::Color(255, 255, 255, 255));
   matrix.fillScreen(0);
   matrix.show();
-//  delay(500);
+//    delay(500);
+}
+
+void HSVtoRGB(float& fR, float& fG, float& fB, float& fH, float& fS, float& fV) {
+  float fC = fV * fS; // Chroma
+  float fHPrime = fmod(fH / 60.0, 6);
+  float fX = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
+  float fM = fV - fC;
+
+  if (0 <= fHPrime && fHPrime < 1) {
+    fR = fC;
+    fG = fX;
+    fB = 0;
+  } else if (1 <= fHPrime && fHPrime < 2) {
+    fR = fX;
+    fG = fC;
+    fB = 0;
+  } else if (2 <= fHPrime && fHPrime < 3) {
+    fR = 0;
+    fG = fC;
+    fB = fX;
+  } else if (3 <= fHPrime && fHPrime < 4) {
+    fR = 0;
+    fG = fX;
+    fB = fC;
+  } else if (4 <= fHPrime && fHPrime < 5) {
+    fR = fX;
+    fG = 0;
+    fB = fC;
+  } else if (5 <= fHPrime && fHPrime < 6) {
+    fR = fC;
+    fG = 0;
+    fB = fX;
+  } else {
+    fR = 0;
+    fG = 0;
+    fB = 0;
+  }
+
+  fR += fM;
+  fG += fM;
+  fB += fM;
 }
