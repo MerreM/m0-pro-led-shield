@@ -4,6 +4,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_NeoMatrix.h>
 #include <Adafruit_NeoPixel.h>
+#include <math.h>       /* sin */
 #ifndef PSTR
 #define PSTR // Make Arduino Due happy
 #endif
@@ -40,34 +41,31 @@ Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(5, 8, PIN,
                             NEO_MATRIX_COLUMNS + NEO_MATRIX_PROGRESSIVE,
                             NEO_GRBW            + NEO_KHZ800);
 
-const uint32_t colors[] = {
-  Adafruit_NeoPixel::Color(255,  0,  0, 0),
-  Adafruit_NeoPixel::Color(171, 85,  0, 0),
-  Adafruit_NeoPixel::Color(171, 171,  0, 0),
-  Adafruit_NeoPixel::Color(0, 255,  0, 0),
-  Adafruit_NeoPixel::Color(0, 171, 85, 0),
-  Adafruit_NeoPixel::Color(0,  0, 255, 0),
-  Adafruit_NeoPixel::Color(85,  0, 171, 0),
-  Adafruit_NeoPixel::Color(171,  0, 85, 0),
-  Adafruit_NeoPixel::Color(255,  0,  0, 0),
-};
-
 void setup() {
   matrix.begin();
   matrix.setTextWrap(false);
   matrix.setBrightness(10);
-  matrix.setTextColor(colors[0]);
+}
+
+uint32_t colorStep(int input_value) {
+  float step = 0;
+  float input_value_2 = (float)input_value;
+  step = (float)input_value_2 / 1000;
+  int r = (sin(step) * 128) + 128;
+  int g = (sin(step * PI + 2) * 128) + 128;
+  int b = (sin(step * PI + 4) * 128) + 128;
+  return Adafruit_NeoPixel::Color(r,  g, b, 0);
 }
 
 int pass = 0;
 
 void loop() {
   pass++;
-  if (pass >= 9) {
+  if (pass >= 10000) {
     pass = 0;
   }
-  matrix.setPassThruColor(colors[pass]);
+  matrix.setPassThruColor(colorStep(pass));
   matrix.fillScreen(0);
   matrix.show();
-  delay(1000);
+//  delay(500);
 }
